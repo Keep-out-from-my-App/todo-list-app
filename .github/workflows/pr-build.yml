@@ -1,0 +1,55 @@
+name: PR Build
+
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+env:
+  gradleFlags: --parallel --stacktrace --no-configuration-cache --no-daemon
+  YANDEX_CLIENT_ID: ${{ secrets.YANDEX_CLIENT_ID }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  TELEGRAM_BOT_API: ${{ secrets.TELEGRAM_BOT_API }}
+  KEY_STORE_PATH: ${{ secrets.KEY_STORE_PATH }}
+  KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+  KEY_STORE_CONTENT: ${{ secrets.KEY_STORE_CONTENT }}
+  KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+  KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+
+jobs:
+  build-and-telegram-report:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - name: Grant execute permission for gradlew
+        shell: bash
+        run: chmod +x gradlew
+      - name: Setup secrets
+        run: echo -e "YANDEX_CLIENT_ID=${YANDEX_CLIENT_ID}\nTELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}\nTELEGRAM_BOT_API=${TELEGRAM_BOT_API}\nKEY_STORE_PASSWORD=${KEY_STORE_PASSWORD}\nKEY_PASSWORD=${KEY_PASSWORD}\nKEY_ALIAS=${KEY_ALIAS}\nKEY_STORE_PATH=${{ github.workspace }}/${KEY_STORE_PATH}" > secrets.properties
+      - name: Setup keystore
+        env:
+          ENCODED_KEYSTORE: ${{ secrets.KEY_STORE_CONTENT }}
+          DECODED_KEYSTORE_PATH: ${{ secrets.KEY_STORE_PATH }}
+        run: |
+          echo $ENCODED_KEYSTORE > keystore_base64.txt
+          base64 -d keystore_base64.txt > $DECODED_KEYSTORE_PATH
+      - name: Build with Gradle
+        run: ./gradlew :app:reportWithApkDetailsForReleaseSigned $gradleFlags
+      - name: Get apk file name
+        run: |
+          APK_FILE=$(find ${{ github.workspace }}/app/build/outputs/apk/release-signed/ -type f -name "*.apk" | head -n 1)
+          echo "APK_FILE=$APK_FILE" >> $GITHUB_ENV
+          APK_FILE_NAME=$(basename $APK_FILE)
+          echo "APK_FILE_NAME=$APK_FILE_NAME" >> $GITHUB_ENV
+      - name: Upload apk
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.APK_FILE_NAME }}
+          path: ${{ env.APK_FILE }}

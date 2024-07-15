@@ -4,58 +4,40 @@ import android.app.Application
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
+import androidx.work.Configuration
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import ru.gribbirg.todoapp.data.db.TodoDao
-import ru.gribbirg.todoapp.data.db.TodoDatabase
-import ru.gribbirg.todoapp.data.keyvaluesaver.DataStoreSaver
-import ru.gribbirg.todoapp.data.logic.listMergerImpl
-import ru.gribbirg.todoapp.data.network.ItemsApiClientImpl
-import ru.gribbirg.todoapp.data.repositories.items.TodoItemRepository
-import ru.gribbirg.todoapp.data.repositories.items.TodoItemRepositoryImpl
-import ru.gribbirg.todoapp.data.repositories.login.LoginRepository
-import ru.gribbirg.todoapp.data.repositories.login.LoginRepositoryImpl
-import ru.gribbirg.todoapp.utils.TodoListUpdateNetworkCallback
-import ru.gribbirg.todoapp.utils.TodoListUpdateWorkManager
+import androidx.work.WorkerFactory
+import ru.gribbirg.data.background.TodoListUpdateWorkManager
+import ru.gribbirg.todoapp.di.DaggerAppComponent
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 /**
  * Application class, handle main dependencies
  */
-class TodoApplication : Application() {
+class TodoApplication : Application(), Configuration.Provider {
 
-    private val internetDataStore by lazy {
-        DataStoreSaver(applicationContext, "internet_data")
-    }
+    @Inject
+    lateinit var workerFactory: WorkerFactory
 
-    private val apiClientImpl: ItemsApiClientImpl by lazy {
-        ItemsApiClientImpl(dataStore = internetDataStore)
-    }
-    private val itemsDbDao: TodoDao by lazy {
-        TodoDatabase.getInstance(
-            applicationContext
-        ).getTodoDao()
-    }
+    @Inject
+    lateinit var networkCallback: ConnectivityManager.NetworkCallback
 
-    val todoItemRepository: TodoItemRepository by lazy {
-        TodoItemRepositoryImpl(
-            todoDao = itemsDbDao,
-            apiClientImpl = apiClientImpl,
-            context = applicationContext,
-            internetDataStore = internetDataStore,
-            listsMerger = listMergerImpl,
-        )
+    internal val appComponent by lazy {
+        DaggerAppComponent
+            .factory()
+            .create(applicationContext)
     }
 
-    val loginRepository: LoginRepository by lazy {
-        LoginRepositoryImpl(
-            internetDataStore = internetDataStore,
-        )
-    }
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()
+
+        appComponent.inject(this)
         scheduleDatabaseUpdate()
         registerConnectivityManager()
     }
@@ -78,7 +60,6 @@ class TodoApplication : Application() {
             .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
             .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
             .build()
-        val networkCallback = TodoListUpdateNetworkCallback(todoItemRepository)
         val connectivityManager =
             getSystemService(ConnectivityManager::class.java) as ConnectivityManager
         connectivityManager.requestNetwork(networkRequest, networkCallback)

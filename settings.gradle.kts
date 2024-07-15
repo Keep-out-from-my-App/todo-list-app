@@ -1,4 +1,9 @@
+rootProject.name = "TodoApp"
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -12,13 +17,18 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
     }
 }
 
-rootProject.name = "Todo App"
 include(":app")
- 
+include(":feature:list")
+include(":feature:edit")
+include(":domain")
+include(":core:data")
+include(":core:utils")
+include(":core:network")
+include(":core:db")
+include(":core:ui")
