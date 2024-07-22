@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
@@ -26,12 +27,13 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import ru.gribbirg.domain.model.TodoItem
+import ru.gribbirg.domain.model.todo.TodoItem
 import ru.gribbirg.edit.components.EditScreenAppBarComponent
 import ru.gribbirg.edit.components.ItemDeadline
 import ru.gribbirg.edit.components.ItemDelete
 import ru.gribbirg.edit.components.ItemImportanceSelector
 import ru.gribbirg.edit.components.ItemTextField
+import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.ui.components.ErrorComponent
 import ru.gribbirg.ui.components.LoadingComponent
 import ru.gribbirg.ui.previews.DefaultPreview
@@ -41,7 +43,6 @@ import ru.gribbirg.ui.previews.LayoutDirectionPreviews
 import ru.gribbirg.ui.previews.OrientationPreviews
 import ru.gribbirg.ui.previews.ScreenPreviewTemplate
 import ru.gribbirg.ui.previews.ThemePreviews
-import ru.gribbirg.ui.theme.AppTheme
 
 /**
  * Edit and create item screen
@@ -52,7 +53,7 @@ import ru.gribbirg.ui.theme.AppTheme
 @Composable
 fun EditItemScreen(
     viewModel: EditItemViewModel,
-    onClose: () -> Unit
+    onClose: (String?) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -61,17 +62,15 @@ fun EditItemScreen(
         onClose = onClose,
         onSave = viewModel::save,
         onEdit = viewModel::edit,
-        onDelete = viewModel::delete
     )
 }
 
 @Composable
 private fun EditItemScreenContent(
     uiState: EditItemUiState,
-    onClose: () -> Unit,
+    onClose: (String?) -> Unit,
     onSave: () -> Unit,
     onEdit: (TodoItem) -> Unit,
-    onDelete: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
     val focusManager = LocalFocusManager.current
@@ -83,7 +82,7 @@ private fun EditItemScreenContent(
             EditScreenAppBarComponent(
                 focusManager = focusManager,
                 onSave = onSave,
-                onClose = onClose,
+                onClose = { onClose(null) },
                 saveEnabled = uiState is EditItemUiState.Loaded,
                 scrollState = scrollState,
             )
@@ -95,8 +94,7 @@ private fun EditItemScreenContent(
                     uiState = uiState,
                     onEdit = onEdit,
                     focusManager = focusManager,
-                    onDelete = onDelete,
-                    onClose = onClose,
+                    onDelete = { onClose(uiState.item.id) },
                     modifier = Modifier
                         .padding(
                             top = paddingValue.calculateTopPadding(),
@@ -135,7 +133,6 @@ private fun EditScreenLoadedContent(
     onEdit: (TodoItem) -> Unit,
     focusManager: FocusManager,
     onDelete: () -> Unit,
-    onClose: () -> Unit,
     modifier: Modifier = Modifier,
     bottomPadding: Dp = 0.dp,
 ) {
@@ -162,6 +159,9 @@ private fun EditScreenLoadedContent(
                 onEdit(uiState.item.copy(importance = importance))
             },
             onClick = focusManager::clearFocus,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(AppTheme.dimensions.cardCornersRadius))
         )
         EdiItemSeparator(
             modifier = Modifier.padding(
@@ -186,10 +186,7 @@ private fun EditScreenLoadedContent(
         )
         ItemDelete(
             enabled = uiState.itemState == EditItemUiState.ItemState.EDIT,
-            onDeleted = {
-                onDelete()
-                onClose()
-            },
+            onDeleted = onDelete,
             onClick = focusManager::clearFocus,
         )
         Spacer(modifier = Modifier.height(bottomPadding))
@@ -230,7 +227,6 @@ private fun EditItemScreenPreview(
                 if (state is EditItemUiState.Loaded) state =
                     (state as EditItemUiState.Loaded).copy(item = it)
             },
-            onDelete = { },
         )
     }
 }

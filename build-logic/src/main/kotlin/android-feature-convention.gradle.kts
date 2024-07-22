@@ -1,3 +1,4 @@
+import gradle.kotlin.dsl.accessors._8e8a6dd48b2094ffcd3758431423791d.debugImplementation
 import gradle.kotlin.dsl.accessors._8e8a6dd48b2094ffcd3758431423791d.implementation
 import java.util.Properties
 
@@ -11,6 +12,7 @@ android {
     baseAndroidConfig()
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = AndroidConst.COMPOSE_COMPILER_VERSION
@@ -42,6 +44,15 @@ dependencies {
     // Collapsing Toolbar Layout
     implementation(libs.toolbar.compose)
 
+    // divkit
+    implementation(libs.yandex.div)
+    implementation(libs.yandex.div.core)
+    implementation(libs.yandex.div.json)
+    implementation(libs.yandex.div.utils)
+    implementation(libs.yandex.div.picasso)
+    implementation(libs.okhttp3)
+
+    implementation(libs.androidx.ui.viewbinding)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -50,4 +61,6 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.tooling.preview)
 }

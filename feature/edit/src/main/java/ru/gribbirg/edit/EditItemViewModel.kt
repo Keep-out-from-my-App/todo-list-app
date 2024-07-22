@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.gribbirg.domain.model.TodoItem
+import ru.gribbirg.domain.model.todo.TodoItem
 import ru.gribbirg.domain.repositories.TodoItemRepository
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -93,14 +93,6 @@ class EditItemViewModel @AssistedInject constructor(
                         state
                 }
             }
-        }
-    }
-
-    internal fun delete() {
-        viewModelScope.launch(coroutineExceptionHandler) {
-            val state = uiState.value
-            if (state is EditItemUiState.Loaded)
-                todoItemRepository.deleteItem(state.item.id)
         }
     }
 

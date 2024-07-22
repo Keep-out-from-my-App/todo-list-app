@@ -9,4 +9,9 @@
     <string name="done_count">Выполнено — %1d</string>
     <string name="new_item">Новое</string>
     <string name="auth_error">Произошла ошибка. Повторите авторизацию позже.</string>
+    <string name="settings">Настройки</string>
+    <string name="about_app">О приложении</string>
+    <string name="item_deleted">Удалено "%1$s"</string>
+    <string name="cancel">ОТМЕНИТЬ</string>
+    <string name="menu">Меню</string>
 </resources>

@@ -1,19 +1,17 @@
 package ru.gribbirg.edit.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -24,14 +22,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import ru.gribbirg.domain.model.TodoImportance
+import ru.gribbirg.domain.model.todo.TodoImportance
+import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.todoapp.edit.R
 import ru.gribbirg.ui.previews.DefaultPreview
 import ru.gribbirg.ui.previews.LanguagePreviews
 import ru.gribbirg.ui.previews.LayoutDirectionPreviews
 import ru.gribbirg.ui.previews.ScreenPreviewTemplate
 import ru.gribbirg.ui.previews.ThemePreviews
-import ru.gribbirg.ui.theme.AppTheme
 
 /**
  * Importance selector row
@@ -45,8 +43,19 @@ internal fun ItemImportanceSelector(
 ) {
     var menuOpened by remember { mutableStateOf(false) }
 
+    val contentColor = importance.colorId?.let { colorResource(it) }
+        ?: AppTheme.colors.tertiary
+
     Column(
         modifier = modifier
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(),
+            ) {
+                onClick()
+                menuOpened = true
+            }
+            .padding(AppTheme.dimensions.paddingSmall)
     ) {
         Text(
             text = stringResource(id = R.string.importance),
@@ -57,79 +66,34 @@ internal fun ItemImportanceSelector(
             style = AppTheme.typography.body,
             color = AppTheme.colors.primary
         )
-        TextButton(
-            onClick = {
-                onClick()
-                menuOpened = true
-            },
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = importance.colorId?.let { colorResource(it) }
-                    ?: AppTheme.colors.tertiary
-            )
+        Row(
+            modifier = Modifier.padding(
+                horizontal = AppTheme.dimensions.paddingMedium,
+                vertical = AppTheme.dimensions.paddingSmall
+            ),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (importance.logoId != null) {
-                    Icon(
-                        painter = painterResource(id = importance.logoId!!),
-                        contentDescription = stringResource(id = importance.nameId),
-                        modifier = Modifier,
-                    )
-                    Spacer(modifier = Modifier.width(AppTheme.dimensions.paddingMedium))
-                }
-                Text(
-                    text = stringResource(id = importance.nameId),
-                    style = AppTheme.typography.subhead
+            if (importance.logoId != null) {
+                Icon(
+                    painter = painterResource(id = importance.logoId!!),
+                    contentDescription = stringResource(id = importance.nameId),
+                    modifier = Modifier,
+                    tint = contentColor,
                 )
+                Spacer(modifier = Modifier.width(AppTheme.dimensions.paddingMedium))
             }
+            Text(
+                text = stringResource(id = importance.nameId),
+                style = AppTheme.typography.subhead,
+                color = importance.colorId?.let { colorResource(it) }
+                    ?: AppTheme.colors.tertiary,
+            )
         }
 
-        ItemImportanceMenu(
-            menuOpened = menuOpened,
-            onChanged = onChanged,
-            onClose = { menuOpened = false }
-        )
-    }
-}
-
-@Composable
-private fun ItemImportanceMenu(
-    menuOpened: Boolean,
-    onChanged: (TodoImportance) -> Unit,
-    onClose: () -> Unit,
-) {
-    DropdownMenu(
-        expanded = menuOpened,
-        onDismissRequest = onClose,
-        modifier = Modifier.background(AppTheme.colors.elevated)
-    ) {
-        for (importanceValue in TodoImportance.entries) {
-            val color = importanceValue.colorId?.let { colorResource(it) }
-                ?: AppTheme.colors.primary
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = stringResource(id = importanceValue.nameId),
-                        style = AppTheme.typography.body
-                    )
-                },
-                onClick = {
-                    onChanged(importanceValue)
-                    onClose()
-                },
-                leadingIcon = {
-                    importanceValue.logoId?.let {
-                        Icon(
-                            painterResource(id = it),
-                            contentDescription = stringResource(id = importanceValue.nameId)
-                        )
-                    } ?: Spacer(modifier = Modifier)
-                },
-                colors = MenuDefaults.itemColors(
-                    textColor = color,
-                    leadingIconColor = color
-                )
+        if (menuOpened) {
+            ItemImportanceMenu(
+                onChanged = onChanged,
+                onClose = { menuOpened = false }
             )
         }
     }
@@ -148,7 +112,7 @@ private fun ItemImportanceSelectorPreview() {
                 .padding(paddingValue),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            var importance by remember { mutableStateOf(TodoImportance.No) }
+            var importance by remember { mutableStateOf(TodoImportance.Low) }
             ItemImportanceSelector(importance = importance, onChanged = { importance = it })
         }
     }

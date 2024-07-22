@@ -1,17 +1,16 @@
 package ru.gribbirg.todoapp.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import ru.gribbirg.about.AboutScreen
+import ru.gribbirg.edit.EditItemScreen
+import ru.gribbirg.list.TodoListItemScreen
+import ru.gribbirg.settings.SettingsScreen
+import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.todoapp.di.AppComponent
-import ru.gribbirg.ui.theme.AppTheme
 
 /**
  * Navigation graph
@@ -37,24 +36,26 @@ internal fun NavGraph(
     ) {
         composable(
             Screen.TodoList.route,
-            arguments = Screen.Edit.arguments,
-            enterTransition = {
-                fadeIn(
-                    animationSpec = tween(durationMillis = animationDuration),
-                    initialAlpha = 0.999f
-                )
-            },
-            exitTransition = {
-                fadeOut(
-                    animationSpec = tween(durationMillis = animationDuration),
-                    targetAlpha = 0.999f
-                )
-            },
-        ) {
-            ru.gribbirg.list.TodoListItemScreen(
+            arguments = Screen.TodoList.arguments,
+            enterTransition = TransitionAnimations.mainScreenEnter(animationDuration),
+            exitTransition = TransitionAnimations.mainScreenExit(animationDuration),
+        ) { backStackEntry ->
+            val deleteId = backStackEntry.arguments?.getString(Screen.Edit.arguments.first().name)
+            TodoListItemScreen(
                 viewModel = listViewModel,
+                deleteId = deleteId,
                 toEditItemScreen = { id ->
                     navController.navigate(Screen.Edit.getRoute(itemId = id)) {
+                        launchSingleTop = true
+                    }
+                },
+                toSettingsScreen = {
+                    navController.navigate(Screen.Settings.route) {
+                        launchSingleTop = true
+                    }
+                },
+                toAboutScreen = {
+                    navController.navigate(Screen.About.route) {
                         launchSingleTop = true
                     }
                 },
@@ -63,34 +64,45 @@ internal fun NavGraph(
         composable(
             Screen.Edit.route,
             arguments = Screen.Edit.arguments,
-            enterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Start,
-                    animationSpec = tween(
-                        animationDuration,
-                        easing = FastOutSlowInEasing
-                    )
-                )
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.End,
-                    animationSpec = tween(
-                        animationDuration,
-                        easing = FastOutSlowInEasing
-                    )
-                )
-            },
+            enterTransition = TransitionAnimations.secondScreenEnter(animationDuration),
+            exitTransition = TransitionAnimations.secondScreenExit(animationDuration),
         ) { backStackEntry ->
             val viewModel = remember {
                 editViewModelFactory
                     .create(backStackEntry.arguments?.getString(Screen.Edit.arguments.first().name))
             }
-            ru.gribbirg.edit.EditItemScreen(
+            EditItemScreen(
                 viewModel = viewModel,
-                onClose = {
+                onClose = { deleteId ->
+                    listViewModel.deleteById(deleteId)
                     navController.popBackStack(Screen.TodoList.route, false)
                 },
+            )
+        }
+        composable(
+            Screen.Settings.route,
+            enterTransition = TransitionAnimations.secondScreenEnter(animationDuration),
+            exitTransition = TransitionAnimations.secondScreenExit(animationDuration),
+        ) {
+            val viewModel = remember {
+                appComponent.settingsFeatureComponent().settingsViewModel
+            }
+            SettingsScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack(Screen.TodoList.route, false) }
+            )
+        }
+        composable(
+            Screen.About.route,
+            enterTransition = TransitionAnimations.secondScreenEnter(animationDuration),
+            exitTransition = TransitionAnimations.secondScreenExit(animationDuration),
+        ) {
+            val viewModel = remember {
+                appComponent.aboutFeatureComponent().viewModel
+            }
+            AboutScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack(Screen.TodoList.route, false) }
             )
         }
     }

@@ -14,13 +14,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
+import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.todoapp.edit.R
 import ru.gribbirg.ui.previews.DefaultPreview
 import ru.gribbirg.ui.previews.ItemPreviewTemplate
 import ru.gribbirg.ui.previews.LanguagePreviews
 import ru.gribbirg.ui.previews.LayoutDirectionPreviews
 import ru.gribbirg.ui.previews.ThemePreviews
-import ru.gribbirg.ui.theme.AppTheme
 
 /**
  * Text field row
@@ -42,7 +42,7 @@ internal fun ItemTextField(
         onValueChange = { onChanged(it) },
         modifier = modifier.shadow(AppTheme.dimensions.shadowElevationSmall, shape),
         minLines = 5,
-        placeholder = { Text(text = stringResource(id = R.string.type_text)) },
+        placeholder = { Text(text = stringResource(id = R.string.type_text), style = AppTheme.typography.body) },
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = indicatorColor,
             unfocusedIndicatorColor = indicatorColor,

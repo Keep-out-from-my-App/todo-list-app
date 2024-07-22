@@ -15,14 +15,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import ru.gribbirg.domain.model.TodoItem
+import ru.gribbirg.domain.model.todo.TodoItem
+import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.ui.previews.DefaultPreview
 import ru.gribbirg.ui.previews.FontScalePreviews
 import ru.gribbirg.ui.previews.ItemPreviewTemplate
 import ru.gribbirg.ui.previews.LayoutDirectionPreviews
 import ru.gribbirg.ui.previews.ThemePreviews
 import ru.gribbirg.ui.previews.TodoItemPreviewParameterProvider
-import ru.gribbirg.ui.theme.AppTheme
 
 /**
  * Main row component
@@ -51,7 +51,7 @@ internal fun TodoItemRow(
                 onChecked = onChecked,
                 onInfoClicked = onInfoClicked,
                 modifier = Modifier
-                    .defaultMinSize(minHeight = AppTheme.dimensions.sizeItemMinHeight)
+                    .defaultMinSize(minHeight = AppTheme.dimensions.sizeItemMinHeightMedium)
                     .fillMaxWidth()
                     .shadow(AppTheme.dimensions.shadowElevationSmall)
                     .background(AppTheme.colors.secondaryBack)

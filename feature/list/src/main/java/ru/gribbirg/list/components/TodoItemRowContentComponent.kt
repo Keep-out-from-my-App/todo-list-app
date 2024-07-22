@@ -29,14 +29,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import ru.gribbirg.domain.model.TodoImportance
+import ru.gribbirg.domain.model.todo.TodoImportance
+import ru.gribbirg.domain.model.todo.TodoItem
+import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.ui.previews.DefaultPreview
 import ru.gribbirg.ui.previews.FontScalePreviews
 import ru.gribbirg.ui.previews.ItemPreviewTemplate
 import ru.gribbirg.ui.previews.LayoutDirectionPreviews
 import ru.gribbirg.ui.previews.ThemePreviews
 import ru.gribbirg.ui.previews.TodoItemPreviewParameterProvider
-import ru.gribbirg.ui.theme.AppTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -48,7 +49,7 @@ import java.time.format.FormatStyle
  */
 @Composable
 internal fun TodoItemRowContent(
-    item: ru.gribbirg.domain.model.TodoItem,
+    item: TodoItem,
     onChecked: (Boolean) -> Unit,
     onInfoClicked: () -> Unit,
     modifier: Modifier = Modifier
@@ -188,7 +189,7 @@ private fun ItemCheckBox(
 @FontScalePreviews
 @Composable
 private fun TodoItemRowContentPreview(
-    @PreviewParameter(TodoItemPreviewParameterProvider::class) item: ru.gribbirg.domain.model.TodoItem,
+    @PreviewParameter(TodoItemPreviewParameterProvider::class) item: TodoItem,
 ) {
     var itemState by remember {
         mutableStateOf(item)
