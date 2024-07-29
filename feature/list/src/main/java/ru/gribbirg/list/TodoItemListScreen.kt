@@ -37,7 +37,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.Dp
@@ -49,6 +55,7 @@ import ru.gribbirg.list.components.Sides
 import ru.gribbirg.list.components.TodoItemListCollapsingToolbar
 import ru.gribbirg.list.components.TodoItemRow
 import ru.gribbirg.list.components.TodoItemsListPullToRefreshBox
+import ru.gribbirg.list.testing.ListFeatureTestingTags
 import ru.gribbirg.theme.custom.AppTheme
 import ru.gribbirg.todoapp.list.R
 import ru.gribbirg.ui.components.ErrorComponent
@@ -152,6 +159,7 @@ private fun TodoItemsListScreenContent(
             if (uiState.listState is TodoItemsListUiState.ListState.Loaded)
                 FloatingActionButton(
                     onClick = { toEditItemScreen(null) },
+                    modifier = Modifier.testTag(ListFeatureTestingTags.ADD_BUTTON),
                     shape = CircleShape,
                     containerColor = AppTheme.colors.blue,
                     contentColor = AppTheme.colors.white
@@ -182,6 +190,7 @@ private fun TodoItemsListScreenContent(
                             onChecked = onChecked,
                             onDelete = onDelete,
                             toEditItemScreen = toEditItemScreen,
+                            onRefresh = onRefresh,
                             modifier = Modifier
                                 .animateContentSize()
                                 .fillMaxWidth()
@@ -222,9 +231,12 @@ private fun ListLoadedContent(
     onChecked: (TodoItem, Boolean) -> Unit,
     onDelete: (TodoItem) -> Unit,
     toEditItemScreen: (itemId: String?) -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
     bottomPadding: Dp = 0.dp,
 ) {
+    val context = LocalContext.current
+
     LazyColumn(
         modifier = modifier,
         userScrollEnabled = true,
@@ -261,6 +273,7 @@ private fun ListLoadedContent(
                 onChecked = { value -> onChecked(item, value) },
                 onDeleted = { onDelete(item) },
                 onInfoClicked = { toEditItemScreen(item.id) },
+                onRefresh = onRefresh,
                 dismissOnCheck = listState.filterState == TodoItemsListUiState.ListState.FilterState.NOT_COMPLETED,
                 modifier = Modifier.animateItem(
                     fadeOutSpec = tween(
@@ -291,13 +304,19 @@ private fun ListLoadedContent(
                         .fillMaxWidth()
                         .shadow(AppTheme.dimensions.shadowElevationSmall)
                         .background(AppTheme.colors.secondaryBack)
-                        .clickable { toEditItemScreen(null) },
+                        .clickable { toEditItemScreen(null) }
+                        .semantics(mergeDescendants = true) {
+                            contentDescription = context.getString(R.string.new_item_desc)
+                            role = Role.Button
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Spacer(modifier = Modifier.width(AppTheme.dimensions.paddingExtraExtraLarge))
                     Text(
                         text = stringResource(id = R.string.new_item),
-                        modifier = Modifier.padding(AppTheme.dimensions.paddingLarge),
+                        modifier = Modifier
+                            .padding(AppTheme.dimensions.paddingLarge)
+                            .clearAndSetSemantics { },
                         color = AppTheme.colors.secondary,
                         style = AppTheme.typography.body
                     )

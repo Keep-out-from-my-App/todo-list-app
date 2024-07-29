@@ -11,6 +11,8 @@ fun BaseExtension.baseAndroidConfig() {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        testInstrumentationRunner("ru.gribbirg.todoapp.app.TestRunner")
     }
 
     signingConfigs {
@@ -50,6 +52,10 @@ fun BaseExtension.baseAndroidConfig() {
 
     kotlinOptions {
         jvmTarget = AndroidConst.KOTLIN_JVM_TARGET
+    }
+
+    packagingOptions {
+        resources.excludes.add("META-INF/*")
     }
 }
 
