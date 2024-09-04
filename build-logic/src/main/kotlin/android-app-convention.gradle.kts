@@ -9,7 +9,7 @@ plugins {
 }
 
 configure<BaseAppModuleExtension> {
-    baseAndroidConfig()
+    baseAndroidConfig(project)
     buildFeatures {
         compose = true
     }
@@ -26,7 +26,7 @@ configure<BaseAppModuleExtension> {
     }
     defaultConfig {
         val properties = Properties()
-        properties.load(File("secrets.properties").inputStream())
+        properties.load(project.rootProject.file("secrets.properties").inputStream())
         manifestPlaceholders["YANDEX_CLIENT_ID"] = properties.getProperty("YANDEX_CLIENT_ID")
     }
 }
