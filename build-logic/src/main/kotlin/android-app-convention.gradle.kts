@@ -10,6 +10,7 @@ plugins {
 
 configure<BaseAppModuleExtension> {
     baseAndroidConfig(project)
+
     buildFeatures {
         compose = true
     }
