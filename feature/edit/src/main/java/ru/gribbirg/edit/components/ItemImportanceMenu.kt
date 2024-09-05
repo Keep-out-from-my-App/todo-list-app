@@ -80,7 +80,7 @@ internal fun ItemImportanceMenu(
                             .weight(1f)
                             .clip(RoundedCornerShape(AppTheme.dimensions.cardCornersRadius))
                             .clickable {
-                                onChanged(importanceValue)
+                                //onChanged(importanceValue) TODO: разкомментить
                                 coroutineScope.launch {
                                     if (animColor != stockColor) {
                                         color.animateTo(

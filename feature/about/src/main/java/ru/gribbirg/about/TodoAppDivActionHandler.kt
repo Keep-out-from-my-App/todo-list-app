@@ -30,7 +30,8 @@ internal class TodoAppDivActionHandler(
     private fun handleBrowserAction(url: Uri, context: Context): Boolean {
         val urlIntent = Intent(
             Intent.ACTION_VIEW,
-            url,
+            //url, TODO: вернуть
+            Uri.parse("https://images.app.goo.gl/yq6WL62NdDHEF23Q7")
         )
         context.startActivity(urlIntent)
         return true

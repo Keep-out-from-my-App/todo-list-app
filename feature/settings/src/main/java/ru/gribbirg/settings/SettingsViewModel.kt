@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.yandex.authsdk.YandexAuthResult
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +16,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import ru.gribbirg.domain.model.user.ThemeSettings
 import ru.gribbirg.domain.model.user.UserSettings
 import ru.gribbirg.domain.repositories.LoginRepository
 import ru.gribbirg.domain.utils.SettingsHandler
@@ -118,6 +121,16 @@ class SettingsViewModel @Inject constructor(
     internal fun onAppSettingsChange(userSettings: UserSettings) {
         viewModelScope.launch(coroutineSettingsExceptionHandler) {
             settingsHandler.saveSettings(userSettings)
+
+            // TODO: убрать
+            launch(Dispatchers.IO) {
+                while (true) {
+                    ThemeSettings.entries.forEach {
+                        settingsHandler.saveSettings(UserSettings(it))
+                        delay(1000)
+                    }
+                }
+            }
         }
     }
 

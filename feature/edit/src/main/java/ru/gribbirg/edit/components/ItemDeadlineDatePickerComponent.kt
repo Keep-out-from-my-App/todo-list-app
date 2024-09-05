@@ -25,9 +25,9 @@ import ru.gribbirg.ui.previews.LayoutDirectionPreviews
 import ru.gribbirg.ui.previews.OrientationPreviews
 import ru.gribbirg.ui.previews.ScreenPreviewTemplate
 import ru.gribbirg.ui.previews.ThemePreviews
-import java.time.Instant
+import ru.gribbirg.utils.extensions.currentLocalDateTimeAtUtc
+import ru.gribbirg.utils.extensions.toLocalDate
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.ZoneOffset
 
 /**
@@ -49,10 +49,8 @@ internal fun ItemDeadlineDatePicker(
             TextButton(
                 onClick = {
                     onChanged(
-                        Instant
-                            .ofEpochMilli(datePickerState.selectedDateMillis!!)
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate()
+                        (datePickerState.selectedDateMillis?.toLocalDate()
+                            ?: currentLocalDateTimeAtUtc.toLocalDate()).plusYears(1000) // TODO: убрать
                     )
                     close()
                 },
