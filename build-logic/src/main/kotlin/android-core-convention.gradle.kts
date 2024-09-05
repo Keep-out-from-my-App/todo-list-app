@@ -8,7 +8,7 @@ plugins {
 }
 
 android {
-    baseAndroidConfig()
+    baseAndroidConfig(project)
     buildFeatures {
         compose = true
     }

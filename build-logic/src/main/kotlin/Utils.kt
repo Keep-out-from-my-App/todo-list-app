@@ -1,12 +1,14 @@
 import com.android.build.gradle.BaseExtension
+import org.gradle.api.Project
 import java.io.File
 import java.util.Properties
 
-fun BaseExtension.baseAndroidConfig() {
+fun BaseExtension.baseAndroidConfig(project: Project) {
     setCompileSdkVersion(AndroidConst.COMPILE_SKD)
 
     defaultConfig {
         minSdk = AndroidConst.MIN_SKD
+        targetSdk = AndroidConst.COMPILE_SKD
 
         vectorDrawables {
             useSupportLibrary = true
@@ -18,7 +20,7 @@ fun BaseExtension.baseAndroidConfig() {
     signingConfigs {
         create("release-signed") {
             val properties = Properties()
-            properties.load(File("secrets.properties").inputStream())
+            properties.load(project.rootProject.file("secrets.properties").inputStream())
 
             storeFile = File(properties.getProperty("KEY_STORE_PATH"))
             storePassword = properties.getProperty("KEY_STORE_PASSWORD")
