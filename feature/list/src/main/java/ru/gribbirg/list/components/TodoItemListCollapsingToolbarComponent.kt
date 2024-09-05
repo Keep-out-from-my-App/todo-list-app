@@ -65,51 +65,50 @@ internal fun TodoItemListCollapsingToolbar(
     val systemUiController = rememberSystemUiController()
     val context = LocalContext.current
 
+    val progress = topBarState.toolbarState
+        .progress
+        .let { if (it != 0f && it < 0.0001f) 1f else it }
+
+    val textSize = getToolbarValue(
+        AppTheme.typography.titleLarge.fontSize.value,
+        AppTheme.typography.title.fontSize.value,
+        progress
+    ).sp
+    val leftPadding = getToolbarValue(60f, 16f, progress).dp
+
+    val countColor = AppTheme.colors.tertiary
+        .let {
+            it.copy(
+                alpha = getToolbarValue(
+                    it.alpha,
+                    0f,
+                    maxOf(0f, progress * 2 - 1f)
+                )
+            )
+        }
+
+    val boxColor =
+        getToolbarValue(
+            AppTheme.colors.primaryBack,
+            AppTheme.colors.appBar,
+            progress
+        )
+
+    systemUiController.setStatusBarColor(color = boxColor)
+
     CollapsingToolbarScaffold(modifier = Modifier
-        .fillMaxSize()
-        .padding(
-            top = topPadding,
-        ),
+        .fillMaxSize(),
         state = topBarState,
         scrollStrategy = ScrollStrategy.ExitUntilCollapsed,
         toolbarModifier = Modifier.setShadow(topBarState.toolbarState.progress),
         toolbar = {
-            val progress = topBarState.toolbarState
-                .progress
-                .let { if (it != 0f && it < 0.0001f) 1f else it }
-
-            val textSize = getToolbarValue(
-                AppTheme.typography.titleLarge.fontSize.value,
-                AppTheme.typography.title.fontSize.value,
-                progress
-            ).sp
-            val leftPadding = getToolbarValue(60f, 16f, progress).dp
-
-            val countColor = AppTheme.colors.tertiary
-                .let {
-                    it.copy(
-                        alpha = getToolbarValue(
-                            it.alpha,
-                            0f,
-                            maxOf(0f, progress * 2 - 1f)
-                        )
-                    )
-                }
-
-            val boxColor =
-                getToolbarValue(
-                    AppTheme.colors.primaryBack,
-                    AppTheme.colors.appBar,
-                    progress
-                )
-
-            systemUiController.setStatusBarColor(color = boxColor)
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(140.dp)
+                    .height(140.dp + topPadding)
                     .background(boxColor)
+                    .padding(top = topPadding)
                     .pin()
             )
 
@@ -122,7 +121,7 @@ internal fun TodoItemListCollapsingToolbar(
                     )
                     .padding(
                         start = leftPadding,
-                        top = 16.dp,
+                        top = 16.dp + topPadding,
                         end = 140.dp,
                         bottom = 20.dp
                     ),
@@ -144,7 +143,7 @@ internal fun TodoItemListCollapsingToolbar(
                         )
                         .padding(
                             start = leftPadding,
-                            top = 16.dp,
+                            top = 16.dp + topPadding,
                             end = 140.dp,
                             bottom = 20.dp
                         )
@@ -164,7 +163,7 @@ internal fun TodoItemListCollapsingToolbar(
                     )
                     .padding(
                         start = leftPadding,
-                        top = 16.dp,
+                        top = 16.dp + topPadding,
                         end = 16.dp,
                         bottom = 20.dp
                     ),
